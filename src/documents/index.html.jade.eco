@@ -1,0 +1,21 @@
+---
+layout: default
+section: tracks
+---
+
+<% section = @document.section %>
+
+div(class='page-content')
+  div(class='clips' class='widget w-<%= section %>')
+    label(for='test') Beat
+      input(type='checkbox' name='beat-3' id='beat-3' data-file="../audio/dubstep-beat.wav")
+
+    label(for='test') Bass 1
+      input(type='checkbox' name='bass-1' id='bass-1' data-file="../audio/bass-loop-sidechained.wav")
+
+    label(for='test') Bass 2
+      input(type='checkbox' name='bass-2' id='bass-2' data-file="../audio/bass-variation-1.wav")
+
+  div(class='controls')
+    button(class='play') Play
+    button(class='stop') Stop
