@@ -1,15 +1,10 @@
 RedAudio = function() {
     this.tempo = 120;
     this.sequenceStep = 0;
-    this.STEPS_PER_PATTERN = 16;
     this.instruments = [{
         'name': 'kick',
         'url': "../audio/kick.wav",
-        'steps': [0, 1, 0, 1]
-    }, {
-        'name': 'snare',
-        'url': "../audio/hat.wav",
-        'steps': [0, 1, 0, 1]
+        'steps': [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
     }];
     this.buffer = {};
     this.bufferReturn = {};
