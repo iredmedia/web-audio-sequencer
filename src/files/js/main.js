@@ -1,7 +1,25 @@
-var context;
-var bufferLoader;
-var sourceList = [];
-var $tracks = $('.w-tracks');
+var context,
+    bufferLoader,
+    sourceList = [],
+    $context   = $('.page-content'),
+    $tracks    = $context.find('.w-tracks'),
+    $sequencer = $context.find('.w-sequencer');
+
+function createGrid (bars, instruments) {
+    var $template = $("<input type='checkbox'>"),
+        indexRow, indexColumn;
+
+    for (indexRow = 0; indexRow < bars; indexRow++) {
+        var rowName = 'row-' + indexRow,
+            $row    = $('<div class="' + rowName + '"></div>').appendTo($sequencer);
+
+        $row.append('<label>Instrument</label>');
+
+        for (indexColumn = 0; indexColumn < instruments; indexColumn++) {
+            $row.append($template.clone());
+        }
+    }
+}
 
 /**
  * Initialize the required assets and page controlls
@@ -9,10 +27,13 @@ var $tracks = $('.w-tracks');
 function initialize() {
     // Fix up prefixing
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    context = new AudioContext();
 
+    context = new AudioContext();
     // Attach button handlers
     setupControls();
+
+    // Create step sequencer
+    createGrid(16, 16);
 }
 
 /**
@@ -22,6 +43,7 @@ function setupControls() {
     $('.play').click(function() {
         stopAll(sourceList);
         loadSounds(bufferLoader);
+    console.log(context.currentTime);
     });
 
     $('.stop').click(function() {
@@ -52,7 +74,7 @@ function loadSounds(bufferLoader) {
     bufferLoader = new BufferLoader(
         context,
         getPaths(),
-        finishedLoading
+        playAll
     );
 
     bufferLoader.load();
@@ -63,7 +85,7 @@ function loadSounds(bufferLoader) {
  *
  * @param bufferList List of buffered sounds
  */
-function finishedLoading(bufferList) {
+function playAll(bufferList) {
     for (sound in bufferList) {
         play(bufferList[sound], 0)
     }
@@ -102,6 +124,9 @@ function stop(sound) {
 function play(buffer, time) {
     // Create a context, add buffer, connect and start
     var source = context.createBufferSource();
+
+    // Loop this sound
+    source.loop = true;
 
     // If time is set
     time = time ? time : 0;
