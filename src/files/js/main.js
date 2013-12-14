@@ -5,6 +5,12 @@ var context,
     $tracks    = $context.find('.w-tracks'),
     $sequencer = $context.find('.w-sequencer');
 
+/**
+ * Create sequencer
+ *
+ * @param bars
+ * @param instruments
+ */
 function createGrid (bars, instruments) {
     var $template = $("<input type='checkbox'>"),
         indexRow, indexColumn;
@@ -27,8 +33,8 @@ function createGrid (bars, instruments) {
 function initialize() {
     // Fix up prefixing
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
     context = new AudioContext();
+
     // Attach button handlers
     setupControls();
 
@@ -65,7 +71,7 @@ function getPaths() {
 }
 
 /**
- *
+ * Buffer list of sounds
  *
  * @param bufferLoader A buffer class
  */
