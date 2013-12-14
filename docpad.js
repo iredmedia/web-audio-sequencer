@@ -10,7 +10,7 @@ docpadConfig = {
       description: "A quick demo of the WebAudio API",
       keywords: "music, daw, audio, web-audio, api",
       styles: ['css/style.css', 'css/vendor/normalize.css', 'css/vendor/main.css'],
-      scripts: ['//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'js/plugins.js', 'js/RhythmSample.js', 'js/BufferLoader.js', 'js/main.js']
+      scripts: ['//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'js/plugins.js', 'js/BufferLoader.js', 'js/RedAudio.js', 'js/main.js']
     },
     getPreparedTitle: function() {
       if (this.document.title) {
