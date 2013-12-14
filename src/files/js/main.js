@@ -5,6 +5,18 @@ var context,
     $tracks    = $context.find('.w-tracks'),
     $sequencer = $context.find('.w-sequencer');
 
+var audio = {
+    buffer: {},
+    compatibility: {},
+    files: [
+        'synth.wav',
+        'beat.wav'
+    ],
+    proceed: true,
+    source_loop: {},
+    source_once: {}
+};
+
 /**
  * Create sequencer
  *
@@ -25,6 +37,16 @@ function createGrid (bars, instruments) {
             $row.append($template.clone());
         }
     }
+
+    return $sequencer;
+}
+
+
+
+function setupSequencer (argument) {
+    // Create step sequencer
+    var labels = createGrid(16, 16).find('label');
+    // labels.append('<input type="file">');
 }
 
 /**
@@ -35,11 +57,11 @@ function initialize() {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     context = new AudioContext();
 
+    // setup step sequencer (grid)
+    setupSequencer();
+
     // Attach button handlers
     setupControls();
-
-    // Create step sequencer
-    createGrid(16, 16);
 }
 
 /**

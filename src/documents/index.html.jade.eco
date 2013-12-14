@@ -1,6 +1,7 @@
 ---
 layout: default
 section: tracks
+files: ["../audio/drum.wav", "../audio/snare.wav", "../audio/hat.wav"]
 ---
 
 div(class='page-content')

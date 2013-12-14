@@ -1,23 +1,25 @@
-var RhythmSample = {
-};
+var RhythmSample = {};
 
 RhythmSample.play = function() {
   function playSound(buffer, time) {
     var source = context.createBufferSource();
+
     source.buffer = buffer;
     source.connect(context.destination);
+
     if (!source.start)
       source.start = source.noteOn;
+
     source.start(time);
   }
 
-  var kick = BUFFERS.kick;
+  var kick  = BUFFERS.kick;
   var snare = BUFFERS.snare;
   var hihat = BUFFERS.hihat;
 
   // We'll start playing the rhythm 100 milliseconds from "now"
-  var startTime = context.currentTime + 0.100;
-  var tempo = 80; // BPM (beats per minute)
+  var startTime      = context.currentTime + 0.100;
+  var tempo          = 120; // BPM (beats per minute)
   var eighthNoteTime = (60 / tempo) / 2;
 
   // Play 2 bars of the following:
