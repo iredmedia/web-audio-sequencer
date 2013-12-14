@@ -1,40 +1,62 @@
-RedAudio = function() {
-    this.tempo = 120;
-    this.sequenceStep = 0;
-    this.instruments = [{
-        'name': 'kick',
-        'url': "../audio/kick.wav",
-        'steps': [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
-    }];
-    this.buffer = {};
-    this.bufferReturn = {};
+// Instrument
+RedSampler = function(config) {
+    this.name  = config.name || '';
+    this.url   = config.url || '';
+    this.steps = config.steps || [
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    ]
+}
+
+// Sampler
+RedAudio = function(instruments) {
+    this.tempo          = 120;
+    this.sequenceStep   = 0;
+    this.instruments    = instruments;
+    this.buffer         = {};
+    this.bufferReturn   = {};
     this.sequencerTimer = [];
 }
 
-// Globalish
-RedAudio.prototype.setup = function() {
+/**
+ * Initialize audio context. Load buffered files from instruments. Set callback / looper for sequencer.
+ */
+RedAudio.prototype.initialize = function() {
     // Set up context
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     context = new AudioContext();
 
-    var urlList = [];
-
-    // Get all instruments
-    for (var i in this.instruments) {
-        urlList.push(this.instruments[i].url)
-    }
+    var sampleList = this.getSamples();
 
     // Load up files
     this.buffer = new BufferLoader(
         context,
-        urlList,
+        sampleList,
         this.sequencerTimerStart.bind(this)
     );
 
     this.buffer.load();
 }
 
-// Per instrument
+/**
+ * Get urls from all Samplers to be processed for Sequencer
+ */
+RedAudio.prototype.getSamples = function() {
+    var urlList = [];
+
+    // Get all instruments paths
+    for (var i in this.instruments) {
+        urlList.push(this.instruments[i].url)
+    }
+
+    return urlList;
+}
+
+/**
+ * Begin loop for each instrument
+ */
 RedAudio.prototype.sequencerTimerStart = function(bufferReturnData) {
     // Calculate intervals given the BPM
     var interval = 60000 / this.tempo / 4;
@@ -43,30 +65,33 @@ RedAudio.prototype.sequencerTimerStart = function(bufferReturnData) {
     console.log("Setting the timer to ", interval, " seconds");
 
     // Create the timer
-    for (var i in this.instruments) {
-        this.sequencerTimer[i] = setInterval(this.sequencerRoutine.bind(this, this.instruments[i], i), interval);
-    }
+    this.sequencerTimer = setInterval(this.sequencerRoutine.bind(this), interval);
 }
 
-// Per instrument
-RedAudio.prototype.sequencerRoutine = function(instrument, index) {
-    console.log("*** sequenceStep + 1 (" + (this.sequenceStep + 1) + ") * " + this.STEPS_PER_PATTERN);
+/**
+ * A typical sequencer routine
+ */
+RedAudio.prototype.sequencerRoutine = function() {
+    console.log("SequenceStep + 1 (" + (this.sequenceStep + 1) + ") * " + this.STEPS_PER_PATTERN);
 
-    // Loop full bar
-    if (this.sequenceStep == instrument.steps.length -1)
-        this.sequenceStep = -1;
+    for (var index in this.instruments) {
+        var instrument = this.instruments[index];
+        // Loop full bar
+        if (this.sequenceStep == instrument.steps.length -1)
+            this.sequenceStep = -1;
 
-    var source = context.createBufferSource();
+        var source = context.createBufferSource();
 
-    source.buffer = this.bufferReturn[index];
-    source.connect(context.destination);
-    source.stop(this.buffer);
+        source.buffer = this.bufferReturn[index];
+        source.connect(context.destination);
+        // source.stop(source.buffer);
 
-    // Is this step active?
-    if(instrument.steps[this.sequenceStep] === 1)
-        source.start(this.buffer);
+        // Is this step active?
+        if(instrument.steps[this.sequenceStep] === 1)
+            source.start(source.buffer);
+        // increment step position
+    }
 
-    // increment step position
     this.next();
 }
 
@@ -74,6 +99,18 @@ RedAudio.prototype.next = function(callback) {
     this.sequenceStep = this.sequenceStep + 1;
 }
 
-var red = new RedAudio();
+var kick = new RedSampler({
+        'name': 'kick',
+        'url': "../audio/kick.wav",
+        'steps': [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
+    });
 
-red.setup();
+var snare = new RedSampler({
+        'name': 'snare',
+        'url': "../audio/snare.wav",
+        'steps': [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0]
+    });
+
+var red = new RedAudio([kick, snare]);
+
+red.initialize();
