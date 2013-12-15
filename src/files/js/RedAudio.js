@@ -28,7 +28,6 @@ RedAudio = function(instruments, config) {
     $sequencer       = config.context || $('.w-sequencer');
 }
 
-
 /**
  * Build start/stop buttons, attach handlers.
  */
@@ -36,6 +35,9 @@ RedAudio.prototype.buildControlsDOM = function() {
     var wrap  = $('<div class="controls"></div>'),
         start = $('<button class="play">Play</button>'),
         stop  = $('<button class="stop">Stop</button>');
+
+    // Empty it
+    $('.controls').remove();
 
     wrap.on('click', '.play', $.proxy(function(){
         this.start();
@@ -46,6 +48,31 @@ RedAudio.prototype.buildControlsDOM = function() {
     wrap.append(start).append(stop);
     $sequencer.after(wrap);
 }
+
+
+/**
+ * Build interface
+ */
+RedAudio.prototype.buildSequencerDOM = function() {
+    $sequencer.empty();
+    for (var index in this.instruments) {
+        var $row  = $('<div class="row"></div>'),
+            $step = $('<input type="checkbox">');
+
+        // Create a new instrument
+        var row = $row.appendTo($sequencer);
+        row.prepend('<label>' + this.instruments[index].name +'</label>')
+
+        row.attr('data-instrument', this.instruments[index].name);
+
+        // Create a step based on the instruments pattern
+        for (var steps in this.instruments[index].steps) {
+            var step = $step.clone().appendTo(row);
+            step.attr('data-step', parseInt(steps) + 1);
+        }
+    }
+}
+
 RedAudio.prototype.refresh = function () {
   // Get all instrument samples ready
     var sampleList = this.getSamples();
@@ -63,6 +90,9 @@ RedAudio.prototype.refresh = function () {
     this.buildSequencerDOM();
     this.buildControlsDOM();
 
+    for (var index in this.instruments) {
+        this.setPattern(this.instruments[index].name);
+    }
 }
 /**
  * Initialize audio context. Load buffered files from instruments. Set callback / looper for sequencer.
@@ -73,9 +103,6 @@ RedAudio.prototype.initialize = function() {
     context             = new AudioContext();
 
     this.refresh();
-
-    this.setPattern('kick');
-    this.setPattern('snare');
 }
 
 /**
@@ -85,28 +112,6 @@ RedAudio.prototype.getInstrumentByName = function(instrumentName) {
     for (var index in this.instruments) {
         if (this.instruments[index].name == instrumentName) {
             return this.instruments[index];
-        }
-    }
-}
-
-/**
- * Build interface
- */
-RedAudio.prototype.buildSequencerDOM = function() {
-    for (var index in this.instruments) {
-        var $row  = $('<div class="row"></div>'),
-            $step = $('<input type="checkbox">');
-
-        // Create a new instrument
-        var row = $row.appendTo($sequencer);
-        row.prepend('<label>' + this.instruments[index].name +'</label>')
-
-        row.attr('data-instrument', this.instruments[index].name);
-
-        // Create a step based on the instruments pattern
-        for (var steps in this.instruments[index].steps) {
-            var step = $step.clone().appendTo(row);
-            step.attr('data-step', parseInt(steps) + 1);
         }
     }
 }
@@ -230,6 +235,9 @@ RedAudio.prototype.setPattern = function(instrumentName) {
     }
 }
 
+/**
+ * Add instrument to list, refresh interface
+ */
 RedAudio.prototype.addInstrument = function(sampler){
     this.instruments.push(sampler);
 

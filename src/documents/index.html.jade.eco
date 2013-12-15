@@ -5,5 +5,3 @@ section: tracks
 
 div(class='page-content')
   div(class='widget w-sequencer')
-
-  div(class='controls')
