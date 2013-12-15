@@ -7,5 +7,3 @@ div(class='page-content')
   div(class='widget w-sequencer')
 
   div(class='controls')
-    button(class='play') Play
-    button(class='stop') Stop

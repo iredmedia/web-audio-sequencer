@@ -25,7 +25,27 @@ RedAudio = function(instruments, config) {
     this.instruments = instruments;
     this.tempo       = config.tempo || 120;
     this.play        = config.play === undefined ? true : config.play
-    $context         = config.context || $('.w-sequencer');
+    $sequencer       = config.context || $('.w-sequencer');
+}
+
+
+/**
+ * Build start/stop buttons, attach handlers.
+ */
+RedAudio.prototype.buildControlsDOM = function() {
+    var wrap  = $('<div class="controls"></div>'),
+        start = $('<button class="play">Play</button>'),
+        stop  = $('<button class="stop">Stop</button>');
+
+    wrap.on('click', '.play', $.proxy(function(){
+        this.stop();
+        this.start();
+    }, this)).on('click', '.stop', $.proxy(function(){
+        this.stop();
+    }, this));
+
+    wrap.append(start).append(stop);
+    $sequencer.after(wrap);
 }
 
 /**
@@ -49,55 +69,40 @@ RedAudio.prototype.initialize = function() {
     // Execute loader
     buffer.load();
 
-    this.buildDOM();
+    this.buildSequencerDOM();
+    this.buildControlsDOM();
 
     this.setPattern('kick');
+    this.setPattern('snare');
+    this.setPattern('hat');
+
     this.getPattern('kick');
-}
-
-/**
- * Return pattern from DOM
- */
-RedAudio.prototype.getPattern = function(instrumentName) {
-    var name = instrumentName,
-        pattern = [];
-
-    $context.find('[data-instrument="' + name +'"]').find('input').each(function(index, value){
-        pattern.push($(value).prop('checked'));
-    });
+    this.getPattern('snare');
+    this.getPattern('hat');
 }
 
 /**
  * Set pattern from config
  */
-RedAudio.prototype.setPattern = function(instrumentName) {
-    var instrument;
-
+RedAudio.prototype.getInstrumentByName = function(instrumentName) {
     for (var index in this.instruments) {
         if (this.instruments[index].name == instrumentName) {
-            instrument = this.instruments[index];
-            console.log(instrument);
+            return this.instruments[index];
+
         }
-    }
-
-    for (var index in instrument.steps) {
-        $context.find('[data-instrument="' + name +'"]').eq(index).prop('checked', true);
-
-        if (instrument.steps[index] === 1)
-            $context.find('[data-instrument="' + instrument.name +'"]').find('input').eq(index).prop('checked', 'checked');
     }
 }
 
 /**
  * Build interface
  */
-RedAudio.prototype.buildDOM = function() {
+RedAudio.prototype.buildSequencerDOM = function() {
     for (var index in this.instruments) {
         var $row  = $('<div class="row"></div>'),
             $step = $('<input type="checkbox">');
 
         // Create a new instrument
-        var row = $row.appendTo($context);
+        var row = $row.appendTo($sequencer);
         row.prepend('<label>' + this.instruments[index].name +'</label>')
 
         row.attr('data-instrument', this.instruments[index].name);
@@ -182,6 +187,32 @@ RedAudio.prototype.getSamples = function() {
     }
 
     return urlList;
+}
+
+/**
+ * Return pattern from DOM
+ */
+RedAudio.prototype.getPattern = function(instrumentName) {
+    var name = instrumentName,
+        pattern = [];
+
+    $sequencer.find('[data-instrument="' + name +'"]').find('input').each(function(index, value){
+        pattern.push($(value).prop('checked'));
+    });
+}
+
+/**
+ * Set pattern from config
+ */
+RedAudio.prototype.setPattern = function(instrumentName) {
+    var instrument = this.getInstrumentByName(instrumentName);
+
+    for (var index in instrument.steps) {
+        $sequencer.find('[data-instrument="' + name +'"]').eq(index).prop('checked', true);
+
+        if (instrument.steps[index] === 1)
+            $sequencer.find('[data-instrument="' + instrument.name +'"]').find('input').eq(index).prop('checked', 'checked');
+    }
 }
 
 /**
