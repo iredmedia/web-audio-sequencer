@@ -2,20 +2,25 @@
 layout: default
 section: tracks
 files: ["../audio/drum.wav", "../audio/snare.wav", "../audio/hat.wav"]
+bars: [0, 0, 0, 0]
+steps: [0, 0, 0, 0]
+instruments: [0, 0, 0, 0]
 ---
 
 div(class='page-content')
-  div(class='widget w-<%= @document.section %>')
-    label(for='test') Beat
-      input(type='checkbox' name='beat-3' id='beat-3' data-file="../audio/dubstep-beat.wav")
-
-    label(for='test') Bass 1
-      input(type='checkbox' name='bass-1' id='bass-1' data-file="../audio/bass-loop-sidechained.wav")
-
-    label(for='test') Bass 2
-      input(type='checkbox' name='bass-2' id='bass-2' data-file="../audio/bass-variation-1.wav")
-
   div(class='widget w-sequencer')
+
+    <% for val, bar in @document.instruments: %>
+      div(class="row")
+        label test
+        ul
+        <% for val, bar in @document.bars: %>
+          <% for val, step in @document.steps: %>
+              li(class="bar-<%- bar + 1 %> step-<%- step + 1 %>")
+                input(type="checkbox")
+          <% end %>
+        <% end %>
+    <% end %>
 
   div(class='controls')
     button(class='play') Play
