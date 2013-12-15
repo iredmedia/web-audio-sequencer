@@ -33,8 +33,8 @@ RedAudio = function(instruments, config) {
  */
 RedAudio.prototype.buildControlsDOM = function() {
     var wrap  = $('<div class="controls"></div>'),
-        start = $('<button class="play">Play</button>'),
-        stop  = $('<button class="stop">Stop</button>');
+        start = $('<button class="play">PLAY</button>'),
+        stop  = $('<button class="stop">STOP</button>');
 
     // Empty it
     $('.controls').remove();
@@ -61,7 +61,7 @@ RedAudio.prototype.buildSequencerDOM = function() {
 
         // Create a new instrument
         var row = $row.appendTo($sequencer);
-        row.prepend('<label>' + this.instruments[index].name +'</label>')
+        row.prepend('<label>' + this.instruments[index].name.toUpperCase() +'</label>')
 
         row.attr('data-instrument', this.instruments[index].name);
 
