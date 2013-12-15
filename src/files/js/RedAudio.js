@@ -38,7 +38,6 @@ RedAudio.prototype.buildControlsDOM = function() {
         stop  = $('<button class="stop">Stop</button>');
 
     wrap.on('click', '.play', $.proxy(function(){
-        this.stop();
         this.start();
     }, this)).on('click', '.stop', $.proxy(function(){
         this.stop();
@@ -47,17 +46,9 @@ RedAudio.prototype.buildControlsDOM = function() {
     wrap.append(start).append(stop);
     $sequencer.after(wrap);
 }
-
-/**
- * Initialize audio context. Load buffered files from instruments. Set callback / looper for sequencer.
- */
-RedAudio.prototype.initialize = function() {
-    // Fix AudioContext compatibility
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    context             = new AudioContext();
-
-    // Get all instrument samples ready
-    var sampleList      = this.getSamples();
+RedAudio.prototype.refresh = function () {
+  // Get all instrument samples ready
+    var sampleList = this.getSamples();
 
     // Buffer files
     var buffer = new BufferLoader(
@@ -72,13 +63,19 @@ RedAudio.prototype.initialize = function() {
     this.buildSequencerDOM();
     this.buildControlsDOM();
 
+}
+/**
+ * Initialize audio context. Load buffered files from instruments. Set callback / looper for sequencer.
+ */
+RedAudio.prototype.initialize = function() {
+    // Fix AudioContext compatibility
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    context             = new AudioContext();
+
+    this.refresh();
+
     this.setPattern('kick');
     this.setPattern('snare');
-    this.setPattern('hat');
-
-    this.getPattern('kick');
-    this.getPattern('snare');
-    this.getPattern('hat');
 }
 
 /**
@@ -88,7 +85,6 @@ RedAudio.prototype.getInstrumentByName = function(instrumentName) {
     for (var index in this.instruments) {
         if (this.instruments[index].name == instrumentName) {
             return this.instruments[index];
-
         }
     }
 }
@@ -116,12 +112,27 @@ RedAudio.prototype.buildSequencerDOM = function() {
 }
 
 /**
+ * Itterator for instruments
+ */
+RedAudio.prototype.each = function (callback) {
+    for (var index in this.instruments) {
+        callback(index, this.instruments[index])
+    }
+}
+
+/**
  * Start sequencer
  */
 RedAudio.prototype.start = function() {
     // Calculate intervals given the tempo
     var interval = 60000 / this.tempo / 4;
     sequencerStep = 0;
+
+    this.stop();
+
+    for (var index in this.instruments) {
+        this.getPattern(this.instruments[index].name);
+    }
 
     this.play = true;
     sequencerTimer = setInterval(this.run.bind(this), interval);
@@ -132,7 +143,9 @@ RedAudio.prototype.start = function() {
  */
 RedAudio.prototype.stop = function() {
     this.play = false;
-    clearInterval(sequencerTimer);
+
+     if (typeof(sequencerTimer) !== "undefined")
+        clearInterval(sequencerTimer);
 }
 
 /**
@@ -147,10 +160,11 @@ RedAudio.prototype.run = function() {
         if (sequencerStep == instrument.steps.length) {
             sequencerStep = 0;
         }
-
+        // console.log(instrument.steps[sequencerStep]);
         // Is this step active?
-        if (instrument.steps[sequencerStep] === 1 && instrument.state) {
+        if (instrument.steps[sequencerStep] === 1) {
             var source = context.createBufferSource();
+
             source.buffer = buffer[index];
             source.connect(context.destination);
             source.start(source.buffer);
@@ -193,16 +207,17 @@ RedAudio.prototype.getSamples = function() {
  * Return pattern from DOM
  */
 RedAudio.prototype.getPattern = function(instrumentName) {
-    var name = instrumentName,
-        pattern = [];
+    var instrument = this.getInstrumentByName(instrumentName);
 
-    $sequencer.find('[data-instrument="' + name +'"]').find('input').each(function(index, value){
-        pattern.push($(value).prop('checked'));
+    instrument.steps = [];
+
+    $sequencer.find('[data-instrument="' + instrument.name +'"]').find('input').each(function(index, element){
+        instrument.steps.push($(element).prop('checked') ? 1 : 0);
     });
 }
 
 /**
- * Set pattern from config
+ * Set DOM pattern from config
  */
 RedAudio.prototype.setPattern = function(instrumentName) {
     var instrument = this.getInstrumentByName(instrumentName);
@@ -215,6 +230,12 @@ RedAudio.prototype.setPattern = function(instrumentName) {
     }
 }
 
+RedAudio.prototype.addInstrument = function(sampler){
+    this.instruments.push(sampler);
+
+    this.refresh();
+}
+
 /**
  * Callback for buffer loader. Begin sequencer
  *
@@ -222,8 +243,4 @@ RedAudio.prototype.setPattern = function(instrumentName) {
  */
 RedAudio.prototype.onLoadComplete = function(bufferData) {
     buffer = bufferData;
-
-    // Create the timer
-    if (this.play)
-        this.start();
 }

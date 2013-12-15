@@ -8,11 +8,6 @@ var samplers = [
             'name': 'snare',
             'url': "../audio/snare.wav",
             'steps': [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0]
-        }),
-        new RedSampler({
-            'name': 'hat',
-            'url': "../audio/hat.wav",
-            'steps': [1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1]
         })
     ],
     red = new RedAudio(samplers, {
@@ -22,5 +17,3 @@ var samplers = [
 
 // Start it up!
 red.initialize();
-
-// red.stop();
