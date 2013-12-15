@@ -22,3 +22,5 @@ var samplers = [
 
 // Start it up!
 red.initialize();
+
+// red.stop();

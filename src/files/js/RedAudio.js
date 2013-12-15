@@ -16,7 +16,7 @@ RedSampler = function(config) {
 }
 
 /**
- * Sampler Sequencer
+ * Sequencer
  *
  * @param instruments - [array] of RedSamplers
  * @param config - {object} containing configuration options
@@ -36,8 +36,6 @@ RedAudio.prototype.initialize = function() {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     context             = new AudioContext();
 
-    this.buildDOM();
-
     // Get all instrument samples ready
     var sampleList      = this.getSamples();
 
@@ -50,6 +48,44 @@ RedAudio.prototype.initialize = function() {
 
     // Execute loader
     buffer.load();
+
+    this.buildDOM();
+
+    this.setPattern('kick');
+    this.getPattern('kick');
+}
+
+/**
+ * Return pattern from DOM
+ */
+RedAudio.prototype.getPattern = function(instrumentName) {
+    var name = instrumentName,
+        pattern = [];
+
+    $context.find('[data-instrument="' + name +'"]').find('input').each(function(index, value){
+        pattern.push($(value).prop('checked'));
+    });
+}
+
+/**
+ * Set pattern from config
+ */
+RedAudio.prototype.setPattern = function(instrumentName) {
+    var instrument;
+
+    for (var index in this.instruments) {
+        if (this.instruments[index].name == instrumentName) {
+            instrument = this.instruments[index];
+            console.log(instrument);
+        }
+    }
+
+    for (var index in instrument.steps) {
+        $context.find('[data-instrument="' + name +'"]').eq(index).prop('checked', true);
+
+        if (instrument.steps[index] === 1)
+            $context.find('[data-instrument="' + instrument.name +'"]').find('input').eq(index).prop('checked', 'checked');
+    }
 }
 
 /**
@@ -133,6 +169,7 @@ RedAudio.prototype.next = function() {
 RedAudio.prototype.prev = function() {
     sequencerStep = sequencerStep - 1;
 }
+
 /**
  * Get urls from all Samplers to be processed for Sequencer
  */
@@ -149,6 +186,7 @@ RedAudio.prototype.getSamples = function() {
 
 /**
  * Callback for buffer loader. Begin sequencer
+ *
  * @param bufferData
  */
 RedAudio.prototype.onLoadComplete = function(bufferData) {
