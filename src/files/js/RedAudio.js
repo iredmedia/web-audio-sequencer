@@ -25,6 +25,7 @@ RedAudio = function(instruments, config) {
     this.instruments = instruments;
     this.tempo       = config.tempo || 120;
     this.play        = config.play === undefined ? true : config.play
+    $context         = config.context || $('.w-sequencer');
 }
 
 /**
@@ -34,6 +35,8 @@ RedAudio.prototype.initialize = function() {
     // Fix AudioContext compatibility
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     context             = new AudioContext();
+
+    this.buildDOM();
 
     // Get all instrument samples ready
     var sampleList      = this.getSamples();
@@ -47,6 +50,28 @@ RedAudio.prototype.initialize = function() {
 
     // Execute loader
     buffer.load();
+}
+
+/**
+ * Build interface
+ */
+RedAudio.prototype.buildDOM = function() {
+    for (var index in this.instruments) {
+        var $row  = $('<div class="row"></div>'),
+            $step = $('<input type="checkbox">');
+
+        // Create a new instrument
+        var row = $row.appendTo($context);
+        row.prepend('<label>' + this.instruments[index].name +'</label>')
+
+        row.attr('data-instrument', this.instruments[index].name);
+
+        // Create a step based on the instruments pattern
+        for (var steps in this.instruments[index].steps) {
+            var step = $step.clone().appendTo(row);
+            step.attr('data-step', parseInt(steps) + 1);
+        }
+    }
 }
 
 /**
